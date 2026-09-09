@@ -1,7 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { loginSchema } from "../validation/loginvalidation.js";
+import { loginSchema } from "../validation/validation.js";
 import { FaEnvelope, FaLock } from "react-icons/fa";
 
 const LoginForm = () => {
