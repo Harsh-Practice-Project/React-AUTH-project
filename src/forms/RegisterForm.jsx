@@ -3,8 +3,13 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import { registerSchema } from "../validation/validation.js";
+import { saveRegisteredUser } from "../services/authService.js";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router";
 
 const RegisterForm = () => {
+  const navigate = useNavigate();
+
   const {
     register,
     reset,
@@ -15,14 +20,19 @@ const RegisterForm = () => {
     mode: "onSubmit",
   });
 
-  const onSubmit = (data) => {  
-    const userData = {
-      ...data,
-      isAuthenticated: false
+  const onSubmit = (data) => {
+    const isSaved = saveRegisteredUser(data);
+
+    if (!isSaved) {
+      toast.error("Email already registered");
+      return;
     }
 
-    console.log(userData);
+    toast.success("User Registered Successfully");
+
     reset();
+
+    navigate("/");
   };
 
   return (
@@ -95,7 +105,8 @@ const RegisterForm = () => {
 
       <button
         type="submit"
-        className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700"
+        disabled={isSubmitting}
+        className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-70"
       >
         {isSubmitting ? "Creating Account..." : "Create Account"}
       </button>

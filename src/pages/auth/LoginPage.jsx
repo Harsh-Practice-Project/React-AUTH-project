@@ -1,8 +1,8 @@
 import React from "react";
 import { NavLink } from "react-router";
-import LoginForm from "../forms/LoginForm";
+import LoginForm from "../../forms/LoginForm";
 
-const LoginPages = () => {
+const LoginPage = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="container mx-auto flex min-h-screen items-center px-4 py-8">
@@ -50,4 +50,4 @@ const LoginPages = () => {
   );
 };
 
-export default LoginPages;
+export default LoginPage;

@@ -3,8 +3,16 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginSchema } from "../validation/validation.js";
 import { FaEnvelope, FaLock } from "react-icons/fa";
+import { useNavigate } from "react-router";
+import { toast } from "react-toastify";
+import useAuth from "../hooks/useAuth.js";
+import { findRegisteredUserByEmail, saveUser } from "../services/authService";
 
 const LoginForm = () => {
+  let navigate = useNavigate();
+
+  let { login } = useAuth();
+
   const {
     register,
     handleSubmit,
@@ -15,10 +23,25 @@ const LoginForm = () => {
   });
 
   const onSubmit = async (data) => {
-    console.log(data);
+    const registeredUser = findRegisteredUserByEmail(data.email);
 
-    // API Call Here
-    // await loginUser(data);
+    // User Not Found OR Password Wrong
+    if (!registeredUser || registeredUser.password !== data.password) {
+      toast.error("Invalid email or password");
+      return;
+    }
+
+    // Save Logged In User
+    saveUser(registeredUser);
+
+    // Update Context
+    login(registeredUser);
+
+    // Success Message
+    toast.success("Logged In Successfully");
+
+    // Redirect
+    navigate("/home");
   };
 
   return (

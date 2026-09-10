@@ -1,15 +1,17 @@
 import { createContext, useState } from "react";
+import { getUser, removeUser } from "../services/authService.js";
 
 export const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(getUser());
 
-  const login = (data) => {
-    setUser(data);
+  const login = (userData) => {
+    setUser(userData);
   };
 
   const logout = () => {
+    removeUser();
     setUser(null);
   };
 
@@ -19,6 +21,7 @@ export const AuthProvider = ({ children }) => {
         user,
         login,
         logout,
+        isAuthenticated: !!user
       }}
     >
       {children}

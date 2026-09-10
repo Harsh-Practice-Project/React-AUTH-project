@@ -1,6 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router";
-import RegisterForm from "../forms/RegisterForm";
+import RegisterForm from "../../forms/RegisterForm";
+import { toast } from "react-toastify";
 
 const RegisterPage = () => {
   return (
