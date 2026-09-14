@@ -6,12 +6,16 @@ import { FaEnvelope, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
 import useAuth from "../hooks/useAuth.js";
-import { findRegisteredUserByEmail, saveUser } from "../services/authService";
+import {
+  findRegisteredUserByEmail,
+  saveUser,
+} from "../services/authService.js";
+import bcrypt from "bcryptjs";
 
 const LoginForm = () => {
-  let navigate = useNavigate();
+  const navigate = useNavigate();
 
-  let { login } = useAuth();
+  const { login } = useAuth();
 
   const {
     register,
@@ -25,23 +29,32 @@ const LoginForm = () => {
   const onSubmit = async (data) => {
     const registeredUser = findRegisteredUserByEmail(data.email);
 
-    // User Not Found OR Password Wrong
-    if (!registeredUser || registeredUser.password !== data.password) {
+    if (!registeredUser) {
       toast.error("Invalid email or password");
       return;
     }
 
-    // Save Logged In User
+    const isPasswordValid = bcrypt.compareSync(
+      data.password,
+      registeredUser.password,
+    );
+
+    if (!isPasswordValid) {
+      toast.error("Invalid email or password");
+      return;
+    }
+
     saveUser(registeredUser);
 
-    // Update Context
     login(registeredUser);
 
-    // Success Message
     toast.success("Logged In Successfully");
 
-    // Redirect
-    navigate("/home");
+    if (registeredUser.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+    } else {
+      navigate("/home",  { replace: true });
+    }
   };
 
   return (
@@ -58,13 +71,13 @@ const LoginForm = () => {
           <input
             type="email"
             placeholder="Enter your email"
+            autoComplete="email"
             {...register("email")}
-            className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition
-              ${
-                errors.email
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-gray-300 focus:border-indigo-500"
-              }`}
+            className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition ${
+              errors.email
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-300 focus:border-indigo-500"
+            }`}
           />
         </div>
 
@@ -85,13 +98,13 @@ const LoginForm = () => {
           <input
             type="password"
             placeholder="Enter your password"
+            autoComplete="current-password"
             {...register("password")}
-            className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition
-              ${
-                errors.password
-                  ? "border-red-500 focus:border-red-500"
-                  : "border-gray-300 focus:border-indigo-500"
-              }`}
+            className={`w-full rounded-xl border py-3 pl-11 pr-4 outline-none transition ${
+              errors.password
+                ? "border-red-500 focus:border-red-500"
+                : "border-gray-300 focus:border-indigo-500"
+            }`}
           />
         </div>
 
@@ -100,7 +113,6 @@ const LoginForm = () => {
         )}
       </div>
 
-      {/* Forgot Password */}
       <div className="flex justify-end">
         <button
           type="button"
@@ -110,7 +122,6 @@ const LoginForm = () => {
         </button>
       </div>
 
-      {/* Submit */}
       <button
         type="submit"
         disabled={isSubmitting}

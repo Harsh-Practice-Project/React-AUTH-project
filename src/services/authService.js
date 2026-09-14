@@ -1,3 +1,5 @@
+import bcrypt from "bcryptjs";
+
 const AUTH_KEY = "auth_user";
 const REGISTER_KEY = "registered_users";
 
@@ -7,7 +9,6 @@ const REGISTER_KEY = "registered_users";
 
 export const getRegisteredUsers = () => {
   const users = localStorage.getItem(REGISTER_KEY);
-
   return users ? JSON.parse(users) : [];
 };
 
@@ -15,7 +16,7 @@ export const saveRegisteredUser = (newUser) => {
   const users = getRegisteredUsers();
 
   const emailExists = users.some(
-    (user) => user.email.toLowerCase() === newUser.email.toLowerCase(),
+    (user) => user.email.toLowerCase() === newUser.email.toLowerCase().trim(),
   );
 
   if (emailExists) {
@@ -59,7 +60,6 @@ export const saveUser = (user) => {
 
 export const getUser = () => {
   const user = localStorage.getItem(AUTH_KEY);
-
   return user ? JSON.parse(user) : null;
 };
 
@@ -69,4 +69,31 @@ export const removeUser = () => {
 
 export const isAuthenticated = () => {
   return !!getUser();
+};
+
+/* =========================
+   ADMIN USER
+========================= */
+
+export const seedAdminUser = () => {
+  const users = getRegisteredUsers();
+
+  const adminExists = users.some(
+    (user) =>
+      user.role === "admin" && user.email === import.meta.env.VITE_ADMIN_EMAIL,
+  );
+
+  if (adminExists) return;
+
+  const adminUser = {
+    id: crypto.randomUUID(),
+    name: "System Admin",
+    email: import.meta.env.VITE_ADMIN_EMAIL,
+    password: bcrypt.hashSync(import.meta.env.VITE_ADMIN_PASSWORD, 10),
+    role: "admin",
+    isActive: true,
+    createdAt: new Date().toISOString(),
+  };
+
+  localStorage.setItem(REGISTER_KEY, JSON.stringify([...users, adminUser]));
 };

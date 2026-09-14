@@ -12,9 +12,10 @@ import Dashboard from "../pages/admin/Dashboard";
 import Users from "../pages/admin/Users";
 import Settings from "../pages/admin/Settings";
 import AdminLayout from "../layouts/AdminLayout";
+import AdminProtectedRoute from "./AdminProtectedRoute";
 
 const AppRoutes = () => {
-  let router = createBrowserRouter([
+  const router = createBrowserRouter([
     {
       path: "/",
       element: <AuthLayout />,
@@ -29,6 +30,7 @@ const AppRoutes = () => {
         },
       ],
     },
+
     {
       element: <ProtectedRoute />,
       children: [
@@ -49,31 +51,34 @@ const AppRoutes = () => {
             },
           ],
         },
-      ],
-    },
-    {
-      element: <ProtectedRoute />,
-      children: [
+
         {
-          element: <AdminLayout />,
+          path: "/admin",
+          element: <AdminProtectedRoute />,
           children: [
             {
-              path: "dashboard",
-              element: <Dashboard />,
-            },
-            {
-              path: "users",
-              element: <Users />,
-            },
-            {
-              path: "settings",
-              element: <Settings />,
+              element: <AdminLayout />,
+              children: [
+                {
+                  path: "dashboard",
+                  element: <Dashboard />,
+                },
+                {
+                  path: "users",
+                  element: <Users />,
+                },
+                {
+                  path: "settings",
+                  element: <Settings />,
+                },
+              ],
             },
           ],
         },
       ],
     },
   ]);
+
   return <RouterProvider router={router} />;
 };
 

@@ -1,11 +1,12 @@
-import { yupResolver } from "@hookform/resolvers/yup";
 import React from "react";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-toastify";
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
+import bcrypt from "bcryptjs";
 import { registerSchema } from "../validation/validation.js";
 import { saveRegisteredUser } from "../services/authService.js";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router";
 
 const RegisterForm = () => {
   const navigate = useNavigate();
@@ -21,16 +22,28 @@ const RegisterForm = () => {
   });
 
   const onSubmit = (data) => {
-    const isSaved = saveRegisteredUser(data);
+    const hashedPassword = bcrypt.hashSync(data.password, 10);
+
+    const userData = {
+      id: crypto.randomUUID(),
+      name: data.name.trim(),
+      email: data.email.toLowerCase().trim(),
+      password: hashedPassword,
+      role: "user",
+      isActive: true,
+      createdAt: new Date().toISOString(),
+    };
+
+    const isSaved = saveRegisteredUser(userData);
 
     if (!isSaved) {
       toast.error("Email already registered");
       return;
     }
 
-    toast.success("User Registered Successfully");
-
     reset();
+
+    toast.success("User Registered Successfully");
 
     navigate("/");
   };
@@ -49,6 +62,7 @@ const RegisterForm = () => {
           <input
             type="text"
             placeholder="Enter your full name"
+            autoComplete="name"
             {...register("name")}
             className="w-full rounded-xl border border-gray-300 py-3 pl-11 pr-4 outline-none transition focus:border-indigo-500"
           />
@@ -71,6 +85,7 @@ const RegisterForm = () => {
           <input
             type="email"
             placeholder="Enter your email"
+            autoComplete="email"
             {...register("email")}
             className="w-full rounded-xl border border-gray-300 py-3 pl-11 pr-4 outline-none transition focus:border-indigo-500"
           />
@@ -93,6 +108,7 @@ const RegisterForm = () => {
           <input
             type="password"
             placeholder="Create a password"
+            autoComplete="new-password"
             {...register("password")}
             className="w-full rounded-xl border border-gray-300 py-3 pl-11 pr-4 outline-none transition focus:border-indigo-500"
           />
@@ -106,7 +122,7 @@ const RegisterForm = () => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:opacity-70"
+        className="w-full rounded-xl bg-indigo-600 py-3 font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-70"
       >
         {isSubmitting ? "Creating Account..." : "Create Account"}
       </button>
